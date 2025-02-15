@@ -3,17 +3,16 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GithubActivity {
 
     public static void main(String[] args) {
-        String username = "loft972"; // Change pour un autre utilisateur GitHub si besoin
-        String url = "https://api.github.com/users/" + username;
 
-        // Créer un client HTTP
+        String url = "https://api.github.com/users/loft972/events";
+
         HttpClient client = HttpClient.newHttpClient();
-
-        // Construire la requête GET
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .header("Accept", "application/vnd.github.v3+json")
@@ -21,26 +20,32 @@ public class GithubActivity {
                 .build();
 
         try {
-            // Envoyer la requête et récupérer la réponse
+
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Vérifier si la requête est réussie
+
             if (response.statusCode() == 200) {
                 String json = response.body();
+                List<String> events = new ArrayList<>();
 
-                // Extraire les données en manipulant la chaîne JSON
-                String name = extractJsonValue(json, "name");
-                String bio = extractJsonValue(json, "bio");
-                String publicRepos = extractJsonValue(json, "public_repos");
-                String followers = extractJsonValue(json, "followers");
-                String profileUrl = extractJsonValue(json, "html_url");
+                int index = 0;
+                while(index < json.length()){
+                    int eventStart = json.indexOf("{",index);
+                    if(eventStart == -1) break;
 
-                // Afficher les informations
-                System.out.println("Nom : " + name);
-                System.out.println("Bio : " + bio);
-                System.out.println("Public Repos : " + publicRepos);
-                System.out.println("Followers : " + followers);
-                System.out.println("GitHub Profile : " + profileUrl);
+                    int eventEnd = findMathcingBracket(json, eventStart);
+                    if(eventEnd == -1 )break;
+
+                    String eventJson = json.substring(eventStart, eventEnd+1);
+                    events.add(eventJson);
+                    index = eventEnd +1;
+                }
+
+                // Affichage du nombre et des objets actor extraits
+                System.out.println("Nombre d'objets actor trouvés : " + events.size());
+                for (int i = 0; i < events.size(); i++) {
+                    System.out.println("events " + (i + 1) + " : " + events.get(i));
+                }
 
             } else {
                 System.out.println("Erreur : " + response.statusCode());
@@ -69,5 +74,20 @@ public class GithubActivity {
         }
 
         return json.substring(startIndex, endIndex).trim();
+    }
+
+    private static int findMathcingBracket(String json, int startIndex){
+        int count = 0;
+        for(int i= startIndex; i<json.length();i++){
+            if(json.charAt(i) == '{'){
+                count++;
+            } else if(json.charAt(i) == '}'){
+                count--;
+                if(count == 0){
+                    return i;
+                }
+            }
+        }
+        return -1;
     }
 }
