@@ -39,7 +39,19 @@ public class GithubActivity {
                     String actorJson = json.substring(actorStart, actorEnd + 1);
                 //}
 
-                createActorInfo(actorJson);
+                System.out.println(createActorInfo(actorJson));
+
+                int repoStart = events.get(0).indexOf("{", events.get(0).indexOf("\"repo\""));
+                //if(actorStart == -1 ) break;
+
+                int repoEnd = findMatchingBracket(json, repoStart);
+                //if (actorEnd == -1) break;
+
+                // Extraction de l'objet actor (sous forme de chaîne JSON)
+                String repoJson = json.substring(repoStart, repoEnd + 1);
+
+                System.out.println(createRepoInfo(repoJson));
+
             } else {
                 System.out.println("Erreur : " + response.statusCode());
             }
@@ -67,7 +79,7 @@ public class GithubActivity {
         return json.substring(startIndex, endIndex).trim();
     }
 
-    private static void createActorInfo(String json){
+    private static Actor createActorInfo(String json){
         // Extraire les données en manipulant la chaîne JSON
         String id = extractJsonValue(json, "id");
         String login = extractJsonValue(json, "login");
@@ -76,8 +88,16 @@ public class GithubActivity {
         String url1 = extractJsonValue(json, "url");
         String avatarUrl = extractJsonValue(json, "avatar_url");
         // Afficher les informations
-        System.out.println(new Actor(Integer.parseInt(id), login, displayLogin, gravatarId, url1, avatarUrl));
-        //return ;
+        return new Actor(Integer.parseInt(id), login, displayLogin, gravatarId, url1, avatarUrl);
+    }
+
+    private static Repo createRepoInfo(String json){
+        // Extraire les données en manipulant la chaîne JSON
+        String id = extractJsonValue(json, "id");
+        String name = extractJsonValue(json, "name");
+        String url1 = extractJsonValue(json, "url");
+        // Afficher les informations
+        return new Repo(Integer.parseInt(id), name, url1);
     }
 
     private static int findMatchingBracket(String json, int startIndex){
