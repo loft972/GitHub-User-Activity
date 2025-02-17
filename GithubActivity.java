@@ -25,13 +25,21 @@ public class GithubActivity {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-
             if (response.statusCode() == 200) {
                 String json = response.body();
                 getEvents(json);
-                System.out.println(events.get(0).indexOf("\"id\""));
+                //for(String event : events){
+                    int actorStart = events.get(0).indexOf("{", events.get(0).indexOf("\"actor\""));
+                    //if(actorStart == -1 ) break;
 
+                    int actorEnd = findMatchingBracket(json, actorStart);
+                    //if (actorEnd == -1) break;
 
+                    // Extraction de l'objet actor (sous forme de chaîne JSON)
+                    String actorJson = json.substring(actorStart, actorEnd + 1);
+                //}
+
+                createActorInfo(actorJson);
             } else {
                 System.out.println("Erreur : " + response.statusCode());
             }
@@ -40,12 +48,37 @@ public class GithubActivity {
         }
     }
 
-    private static void parseObject(String json, int i) {
-        int index = json.indexOf("\"id\"");
-        System.out.println(index);
 
+    // Fonction pour extraire une valeur d'une chaîne JSON
+    private static String extractJsonValue(String json, String key) {
+        String searchKey = "\"" + key + "\":";
+        int startIndex = json.indexOf(searchKey);
+        if (startIndex == -1) return "N/A";
+        startIndex += searchKey.length();
+        // Trouver la fin de la valeur
+        int endIndex;
+        if (json.charAt(startIndex) == '"') { // C'est une chaîne
+            startIndex++;
+            endIndex = json.indexOf('"', startIndex);
+        } else { // C'est un nombre
+            endIndex = json.indexOf(',', startIndex);
+            if (endIndex == -1) endIndex = json.indexOf('}', startIndex); // Dernière valeur du JSON
+        }
+        return json.substring(startIndex, endIndex).trim();
     }
 
+    private static void createActorInfo(String json){
+        // Extraire les données en manipulant la chaîne JSON
+        String id = extractJsonValue(json, "id");
+        String login = extractJsonValue(json, "login");
+        String displayLogin = extractJsonValue(json, "display_login");
+        String gravatarId = extractJsonValue(json, "gravatar_id");
+        String url1 = extractJsonValue(json, "url");
+        String avatarUrl = extractJsonValue(json, "avatar_url");
+        // Afficher les informations
+        System.out.println(new Actor(Integer.parseInt(id), login, displayLogin, gravatarId, url1, avatarUrl));
+        //return ;
+    }
 
     private static int findMatchingBracket(String json, int startIndex){
         int count = 0;
