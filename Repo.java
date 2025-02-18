@@ -1,20 +1,20 @@
 public class Repo {
 
-    private int id;
+    private long id;
     private String name;
     private String url;
 
-    public Repo(int id, String name, String url) {
+    public Repo(long id, String name, String url) {
         this.id = id;
         this.name = name;
         this.url = url;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

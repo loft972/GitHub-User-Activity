@@ -1,13 +1,13 @@
 public class Actor {
 
-    private int id;
+    private Long id;
     private String login;
     private String displayLogin;
     private String gravatarId;
     private String url;
     private String avatarUrl;
 
-    public Actor(int id, String login, String displayLogin, String gravatarId, String url, String avatarUrl) {
+    public Actor(Long id, String login, String displayLogin, String gravatarId, String url, String avatarUrl) {
         this.id = id;
         this.login = login;
         this.displayLogin = displayLogin;
@@ -16,11 +16,11 @@ public class Actor {
         this.avatarUrl = avatarUrl;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

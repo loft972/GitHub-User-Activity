@@ -1,7 +1,7 @@
 public class Payload {
 
-    private int repositoryId;
-    private int pushId;
+    private long repositoryId;
+    private long pushId;
     private int size;
     private int distinctSize;
     private String ref;
@@ -10,7 +10,7 @@ public class Payload {
     private Commits commits;
 
 
-    public Payload(int repositoryId, int pushId, int size, int distinctSize, String ref, String head, String before, Commits commits) {
+    public Payload(long repositoryId, long pushId, int size, int distinctSize, String ref, String head, String before, Commits commits) {
         this.repositoryId = repositoryId;
         this.pushId = pushId;
         this.size = size;
@@ -21,7 +21,7 @@ public class Payload {
         this.commits = commits;
     }
 
-    public int getRepositoryId() {
+    public long getRepositoryId() {
         return repositoryId;
     }
 
@@ -29,7 +29,7 @@ public class Payload {
         this.repositoryId = repositoryId;
     }
 
-    public int getPushId() {
+    public long getPushId() {
         return pushId;
     }
 

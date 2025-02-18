@@ -28,30 +28,42 @@ public class GithubActivity {
             if (response.statusCode() == 200) {
                 String json = response.body();
                 getEvents(json);
-                //for(String event : events){
-                    int actorStart = events.get(0).indexOf("{", events.get(0).indexOf("\"actor\""));
-                    //if(actorStart == -1 ) break;
+                for(String event : events){
+                    //Type
+                    System.out.println("Event : " + extractJsonValue(event, "type"));
 
+                    //Actor
+                    int actorStart = event.indexOf("{", event.indexOf("\"actor\""));
                     int actorEnd = findMatchingBracket(json, actorStart);
-                    //if (actorEnd == -1) break;
 
                     // Extraction de l'objet actor (sous forme de chaîne JSON)
                     String actorJson = json.substring(actorStart, actorEnd + 1);
-                //}
+                    //System.out.println(createActorInfo(actorJson));
 
-                System.out.println(createActorInfo(actorJson));
+                    //Repo
+                    int repoStart = event.indexOf("{", event.indexOf("\"repo\""));
+                    int repoEnd = findMatchingBracket(json, repoStart);
 
-                int repoStart = events.get(0).indexOf("{", events.get(0).indexOf("\"repo\""));
-                //if(actorStart == -1 ) break;
+                    // Extraction de l'objet actor (sous forme de chaîne JSON)
+                    String repoJson = json.substring(repoStart, repoEnd + 1);
+                    System.out.println("Name : "+ createRepoInfo(repoJson).getName());
 
-                int repoEnd = findMatchingBracket(json, repoStart);
-                //if (actorEnd == -1) break;
+                    //Payload
+                    int payloadStart = event.indexOf("{", event.indexOf("\"payload\""));
+                    int payloadEnd = findMatchingBracket(json, payloadStart);
 
-                // Extraction de l'objet actor (sous forme de chaîne JSON)
-                String repoJson = json.substring(repoStart, repoEnd + 1);
+                    // Extraction de l'objet actor (sous forme de chaîne JSON)
+                    String payloadJson = json.substring(payloadStart, payloadEnd + 1);
+                    System.out.println("commits : " + createPayloadInfo(payloadJson).getSize());
 
-                System.out.println(createRepoInfo(repoJson));
+                    //Commits
+                    int commitsStart = event.indexOf("{", event.indexOf("\"commits\""));
+                    int commitsEnd = findMatchingBracket(json, commitsStart);
 
+                    // Extraction de l'objet actor (sous forme de chaîne JSON)
+                    String commitsJson = json.substring(commitsStart, commitsEnd + 1);
+                    //System.out.println(createCommitsInfo(commitsJson));
+                }
             } else {
                 System.out.println("Erreur : " + response.statusCode());
             }
@@ -59,6 +71,8 @@ public class GithubActivity {
             throw new RuntimeException(e);
         }
     }
+
+
 
 
     // Fonction pour extraire une valeur d'une chaîne JSON
@@ -88,7 +102,7 @@ public class GithubActivity {
         String url1 = extractJsonValue(json, "url");
         String avatarUrl = extractJsonValue(json, "avatar_url");
         // Afficher les informations
-        return new Actor(Integer.parseInt(id), login, displayLogin, gravatarId, url1, avatarUrl);
+        return new Actor(Long.parseLong(id), login, displayLogin, gravatarId, url1, avatarUrl);
     }
 
     private static Repo createRepoInfo(String json){
@@ -97,7 +111,45 @@ public class GithubActivity {
         String name = extractJsonValue(json, "name");
         String url1 = extractJsonValue(json, "url");
         // Afficher les informations
-        return new Repo(Integer.parseInt(id), name, url1);
+        return new Repo(Long.parseLong(id), name, url1);
+    }
+
+    private static Payload createPayloadInfo(String json){
+        // Extraire les données en manipulant la chaîne JSON
+        String repositoryId = extractJsonValue(json, "repository_id");
+        String pushId = extractJsonValue(json, "push_id");
+        String size = extractJsonValue(json, "size");
+        String distinctSize = extractJsonValue(json, "distinct_size");
+        String ref = extractJsonValue(json, "ref");
+        String head = extractJsonValue(json, "head");
+        String before = extractJsonValue(json, "before");
+        String commits = extractJsonValue(json, "commits");
+        // Afficher les informations
+
+        return new Payload(Long.parseLong(repositoryId), Long.parseLong(pushId), Integer.parseInt(size), Integer.parseInt(distinctSize), ref, head, before, createCommitsInfo(commits));
+    }
+
+    private static Commits createCommitsInfo(String json){
+        // Extraire les données en manipulant la chaîne JSON
+        String sha = extractJsonValue(json, "sha");
+        String author = extractJsonValue(json, "author");
+        String message = extractJsonValue(json, "message");
+        String distinct = extractJsonValue(json, "distinct");
+        String url1 = extractJsonValue(json, "url");
+        // Afficher les informations
+
+        Author author1 = createAuthorInfo(author);
+
+        return new Commits(sha, author1, message, Boolean.parseBoolean(distinct), url1);
+    }
+
+    private static Author createAuthorInfo(String json){
+        // Extraire les données en manipulant la chaîne JSON
+        String email = extractJsonValue(json, "email");
+        String name = extractJsonValue(json, "name");
+        // Afficher les informations
+
+        return new Author(email, name);
     }
 
     private static int findMatchingBracket(String json, int startIndex){
